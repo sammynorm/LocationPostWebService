@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Samuel Norman - Travel Tracker</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript">
+
+      function initMap() {
+        
+          var count = 0;
+        var myLatLng = {lat: 45.13743, lng: 12.57549};
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 5, center: myLatLng });
+        var polyline = new google.maps.Polyline({strokeColor:"#0000FF",strokeOpacity: 0.4});
+          
+    $(function() {
+          $.get("http://traveltracker-env-1.mmnwm3sqmm.us-east-1.elasticbeanstalk.com/getLocation", function(data) {
+                var pastCoordinates = [];
+                var obj = {};
+                var marker = {};
+              
+                var image = {
+                     url: 'https://storage.googleapis.com/support-kms-prod/SNP_2752068_en_v0',
+                     size: new google.maps.Size(20, 32),
+                     origin: new google.maps.Point(0, 0),
+                     anchor: new google.maps.Point(5, 5)
+
+        };
+                var imageStart = {
+                     url: 'http://maps.google.com/mapfiles/ms/icons/flag.png',
+                     size: new google.maps.Size(32, 32),
+                     origin: new google.maps.Point(0, 0),
+                     anchor: new google.maps.Point(16, 16)
+
+        };
+                var imageCurr = {
+                     url: 'http://maps.google.com/mapfiles/ms/icons/red-pushpin.png',
+                     size: new google.maps.Size(32, 32),
+                     origin: new google.maps.Point(0, 0),
+                     anchor: new google.maps.Point(16, 16)
+
+        };
+           
+                $.each(data, function(i, place){
+                   obj[place.id] = {lat: place.latitude, lng: place.longitude};
+                    
+                    if(place.id == 1){
+                        marker[place.id] = new google.maps.Marker({position: obj[place.id], map: map, icon: imageStart, title: place.id.toString()});
+                    }
+                    else if(data.length -1 == i ){
+                        marker[place.id] = new google.maps.Marker({position: obj[place.id], map: map, icon: imageCurr, title: place.id.toString()});
+
+                    }
+                    else{
+                    marker[place.id] = new google.maps.Marker({position: obj[place.id], map: map, icon: image, title: place.id.toString()});
+                    }
+                                       pastCoordinates.push(marker[place.id].getPosition());
+                })
+              
+          var flightPath = new google.maps.Polyline({
+          path: pastCoordinates,
+          geodesic: true,
+          strokeColor: '#000000',
+          strokeOpacity: 0.5,
+          strokeWeight: 2
+       });
+        flightPath.setMap(map);
+       });
+    });       
+}    
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMZ5U7DJrdPSLCif45hWSJl8RBDA7djnw&callback=initMap">
+    </script>
+  </body>
+</html>
